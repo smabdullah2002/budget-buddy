@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Budget Buddy{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-primary-700">Dashboard</h1>
+<p id="welcomeText" class="text-sm text-gray-600">Welcome!</p>
+
+<div class="grid md:grid-cols-3 gap-6 mt-6">
+  <div class="border rounded-lg p-4">
+    <h2 class="font-semibold text-primary-700">Income</h2>cls
+    <form id="incomeForm" class="mt-3 flex gap-2">
+      <input name="amount" type="number" min="0" class="w-full border rounded-md px-3 py-2" placeholder="Amount" />
+      <button class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md">Save</button>
+    </form>
+  </div>
+  <div class="border rounded-lg p-4">
+    <h2 class="font-semibold text-primary-700">Savings</h2>
+    <form id="savingsForm" class="mt-3 flex gap-2">
+      <input name="amount" type="number" min="0" class="w-full border rounded-md px-3 py-2" placeholder="Amount" />
+      <button class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md">Save</button>
+    </form>
+  </div>
+  <div class="border rounded-lg p-4">
+    <h2 class="font-semibold text-primary-700">Record Expense</h2>
+    <form id="expenseForm" class="mt-3 grid grid-cols-2 gap-2">
+      <input name="amount" type="number" min="0" class="col-span-2 border rounded-md px-3 py-2" placeholder="Amount" />
+      <select name="source" class="border rounded-md px-3 py-2">
+        <option value="income">Income</option>
+        <option value="savings">Savings</option>
+      </select>
+      <select name="catagory" class="border rounded-md px-3 py-2">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Entertainment</option>
+        <option>Utilities</option>
+        <option>Healthcare</option>
+        <option>Education</option>
+        <option>Personal Care</option>
+        <option>Miscellaneous</option>
+      </select>
+      <button class="col-span-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md">Add Expense</button>
+    </form>
+  </div>
+</div>
+
+<div class="mt-8 border rounded-lg p-4">
+  <div class="flex items-center justify-between gap-3 flex-wrap">
+    <h2 class="font-semibold text-primary-700">Recent Expenses</h2>
+    <div class="flex items-center gap-2">
+      <label class="text-sm text-gray-600">Filter by category</label>
+      <select id="categoryFilter" class="border rounded-md px-3 py-1.5">
+        <option value="ALL">All</option>
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Entertainment</option>
+        <option>Utilities</option>
+        <option>Healthcare</option>
+        <option>Education</option>
+        <option>Personal Care</option>
+        <option>Miscellaneous</option>
+      </select>
+      <button id="refreshExpenses" class="border border-primary-600 text-primary-700 px-3 py-1.5 rounded-md hover:bg-primary-50">Refresh</button>
+      <button id="logoutBtn" class="text-red-700 px-3 py-1.5">Logout</button>
+    </div>
+  </div>
+  <ul id="expenseList" class="mt-3 divide-y"></ul>
+</div>
+
+<!-- Monthly Report -->
+<div class="mt-8 border rounded-lg p-4">
+  <div class="flex items-center gap-3 flex-wrap">
+    <h2 class="font-semibold text-primary-700">Monthly Report</h2>
+    <input id="reportYear" type="number" min="2000" class="border rounded-md px-3 py-1.5 w-28" placeholder="Year" />
+    <input id="reportMonth" type="number" min="1" max="12" class="border rounded-md px-3 py-1.5 w-24" placeholder="Month" />
+    <button id="runReport" class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md">Get report</button>
+  </div>
+  <div id="reportContainer" class="mt-4 text-sm"></div>
+  <div id="reportError" class="mt-2 text-red-600 text-sm hidden"></div>
+</div>
+
+<!-- Budget Plan -->
+<div class="mt-8 border rounded-lg p-4">
+  <h2 class="font-semibold text-primary-700">Budget Plan</h2>
+  <div class="mt-3 flex flex-wrap items-center gap-3">
+    <input id="planYear" type="number" min="2000" class="border rounded-md px-3 py-1.5 w-28" placeholder="Year" />
+    <input id="planMonth" type="number" min="1" max="12" class="border rounded-md px-3 py-1.5 w-24" placeholder="Month" />
+    <button id="addPlanRow" class="border border-primary-600 text-primary-700 px-3 py-1.5 rounded-md hover:bg-primary-50">Add row</button>
+    <button id="savePlan" class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md">Save plan</button>
+    <button id="viewPlan" class="border border-primary-600 text-primary-700 px-3 py-1.5 rounded-md hover:bg-primary-50">View plan</button>
+    <button id="deletePlan" class="text-red-700 px-3 py-1.5">Delete plan</button>
+  </div>
+  <div id="planRows" class="mt-4 grid gap-2"></div>
+  <div id="planMsg" class="mt-2 text-sm text-gray-600"></div>
+  <div id="planTable" class="mt-4"></div>
+</div>
+
+<!-- Budget vs Actual -->
+<div class="mt-8 border rounded-lg p-4">
+  <div class="flex items-center gap-3 flex-wrap">
+    <h2 class="font-semibold text-primary-700">Budget vs Actual</h2>
+    <input id="bvaYear" type="number" min="2000" class="border rounded-md px-3 py-1.5 w-28" placeholder="Year" />
+    <input id="bvaMonth" type="number" min="1" max="12" class="border rounded-md px-3 py-1.5 w-24" placeholder="Month" />
+    <button id="runBVA" class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md">Compare</button>
+  </div>
+  <div id="bvaContainer" class="mt-4 text-sm"></div>
+</div>
+
+<script>
+  function authHeaders() {
+    const token = localStorage.getItem('token');
+    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  }
+  function handleAuth(res) {
+    if (res.status === 401) { window.location.href = '/login'; return true; }
+    return false;
+  }
+  async function postJSON(url, payload) {
+    const res = await fetch(url, { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    if (handleAuth(res)) return null;
+    if (!res.ok) throw new Error('Request failed');
+    return res.json();
+  }
+  async function putJSON(url, payload) {
+    const res = await fetch(url, { method: 'PUT', headers: authHeaders(), body: payload ? JSON.stringify(payload) : undefined });
+    if (handleAuth(res)) return null;
+    if (!res.ok) throw new Error('Request failed');
+    try { return await res.json(); } catch { return {}; }
+  }
+  async function del(url) {
+    const res = await fetch(url, { method: 'DELETE', headers: authHeaders() });
+    if (handleAuth(res)) return null;
+    if (!res.ok) throw new Error('Request failed');
+    try { return await res.json(); } catch { return {}; }
+  }
+
+  // Welcome text and user info
+  async function loadUser() {
+    const res = await fetch('/me', { headers: authHeaders() });
+    if (handleAuth(res)) return;
+    const u = await res.json();
+    const w = document.getElementById('welcomeText');
+    w.textContent = `Welcome, ${u.username}! Income: ${u.total_income} • Savings: ${u.total_savings}`;
+  }
+
+  // Forms
+  document.getElementById('incomeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = parseInt(new FormData(e.target).get('amount') || '0', 10);
+    if (!amount) return;
+    await putJSON('/income/', { amount });
+    await loadUser();
+    e.target.reset();
+  });
+
+  document.getElementById('savingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = parseInt(new FormData(e.target).get('amount') || '0', 10);
+    if (!amount) return;
+    await putJSON('/savings/', { amount });
+    await loadUser();
+    e.target.reset();
+  });
+
+  document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = Object.fromEntries(fd.entries());
+    payload.amount = parseInt(payload.amount || '0', 10);
+    if (!payload.amount) return;
+    await postJSON('/expense/', payload);
+    await loadExpenses();
+    await loadUser();
+    e.target.reset();
+  });
+
+  async function loadExpenses(category) {
+    let url = '/expense/';
+    if (category && category !== 'ALL') url = `/expense/${encodeURIComponent(category)}`;
+    const res = await fetch(url, { headers: authHeaders() });
+    if (handleAuth(res)) return;
+    const items = await res.json();
+    const ul = document.getElementById('expenseList');
+    ul.innerHTML = '';
+    for (const it of items) {
+      const li = document.createElement('li');
+      li.className = 'py-2 flex items-center justify-between';
+      li.innerHTML = `<div><div class='font-medium'>${it.catagory}</div><div class='text-sm text-gray-600'>${new Date(it.created_at).toLocaleString()}</div></div><div class='flex items-center gap-3'><div class='font-semibold text-primary-700'>${it.amount}</div><button data-id='${it.id}' class='text-red-600 hover:underline'>Delete</button></div>`;
+      li.querySelector('button').addEventListener('click', async () => {
+        await del(`/expense/${it.id}`);
+        await loadExpenses(category);
+        await loadUser();
+      });
+      ul.appendChild(li);
+    }
+  }
+
+  document.getElementById('categoryFilter').addEventListener('change', async (e) => {
+    await loadExpenses(e.target.value);
+  });
+
+  document.getElementById('refreshExpenses').addEventListener('click', async () => {
+    const v = document.getElementById('categoryFilter').value;
+    await loadExpenses(v);
+  });
+  document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('token'); window.location.href = '/'; });
+
+  // Monthly report
+  document.getElementById('runReport').addEventListener('click', async () => {
+    const year = parseInt(document.getElementById('reportYear').value || '0', 10);
+    const month = parseInt(document.getElementById('reportMonth').value || '0', 10);
+    const err = document.getElementById('reportError');
+    const container = document.getElementById('reportContainer');
+    err.classList.add('hidden'); err.textContent = ''; container.innerHTML = '';
+    if (!year || !month) { err.textContent = 'Enter year and month'; err.classList.remove('hidden'); return; }
+    const res = await fetch(`/expense/monthly/${year}/${month}`, { headers: authHeaders() });
+    if (handleAuth(res)) return;
+    if (!res.ok) { err.textContent = 'Failed to load report'; err.classList.remove('hidden'); return; }
+    const data = await res.json();
+    const exp = data.total_expense || 0;
+    const byCat = data.expense_by_catagory || {};
+    const pct = data.percentage_by_catagory || {};
+    let rows = '';
+    for (const k of Object.keys(byCat)) {
+      rows += `<tr><td class='px-3 py-1 border'>${k}</td><td class='px-3 py-1 border text-right'>${byCat[k]}</td><td class='px-3 py-1 border text-right'>${(pct[k]||0).toFixed(1)}%</td></tr>`;
+    }
+    container.innerHTML = `
+      <div class='text-sm text-gray-700'>Year ${data.year}, Month ${data.month}</div>
+      <div class='mt-1 font-medium'>Total expense: <span class='text-primary-700'>${exp}</span></div>
+      <div class='mt-3 overflow-auto'>
+        <table class='min-w-[400px] text-sm border'>
+          <thead class='bg-primary-50'><tr><th class='px-3 py-1 border text-left'>Category</th><th class='px-3 py-1 border text-right'>Amount</th><th class='px-3 py-1 border text-right'>%</th></tr></thead>
+          <tbody>${rows || '<tr><td class=\'px-3 py-2 text-center\' colspan=\'3\'>No data</td></tr>'}</tbody>
+        </table>
+      </div>`;
+  });
+
+  // Budget plan helpers
+  function planRowTemplate(idx) {
+    return `<div class='grid grid-cols-2 md:grid-cols-3 gap-2 items-center'>
+      <select class='border rounded-md px-3 py-1.5 plan-category'>
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Entertainment</option>
+        <option>Utilities</option>
+        <option>Healthcare</option>
+        <option>Education</option>
+        <option>Personal Care</option>
+        <option>Miscellaneous</option>
+      </select>
+      <input type='number' min='0' class='border rounded-md px-3 py-1.5 plan-amount' placeholder='Amount' />
+      <button type='button' class='text-red-700 remove-plan-row'>Remove</button>
+    </div>`;
+  }
+  document.getElementById('addPlanRow').addEventListener('click', () => {
+    const wrap = document.getElementById('planRows');
+    const div = document.createElement('div');
+    div.innerHTML = planRowTemplate(wrap.children.length);
+    const row = div.firstChild;
+    row.querySelector('.remove-plan-row').addEventListener('click', () => row.remove());
+    wrap.appendChild(row);
+  });
+
+  document.getElementById('savePlan').addEventListener('click', async () => {
+    const year = parseInt(document.getElementById('planYear').value || '0', 10);
+    const month = parseInt(document.getElementById('planMonth').value || '0', 10);
+    const msg = document.getElementById('planMsg'); msg.textContent = '';
+    if (!year || !month) { msg.textContent = 'Enter year and month'; return; }
+    const rows = Array.from(document.querySelectorAll('#planRows .grid'));
+    const planned_expenses = rows.map(r => ({ catagory: r.querySelector('.plan-category').value, amount: parseInt(r.querySelector('.plan-amount').value || '0', 10) }))
+      .filter(x => x.amount > 0);
+    if (!planned_expenses.length) { msg.textContent = 'Add at least one row with amount'; return; }
+    await postJSON(`/budget-plan/${year}/${month}`, { planned_expenses });
+    msg.textContent = 'Saved.';
+  });
+
+  async function renderPlan(year, month) {
+    const container = document.getElementById('planTable');
+    container.innerHTML = '';
+    const res = await fetch(`/budget-plan/${year}/${month}`, { headers: authHeaders() });
+    if (handleAuth(res)) return;
+    if (!res.ok) { container.textContent = 'Failed to load plan'; return; }
+    const data = await res.json();
+    if (!data.length) { container.textContent = 'No plan found for this month.'; return; }
+    const rows = data.map(p => `<tr>
+        <td class='px-3 py-1 border'>${p.category}</td>
+        <td class='px-3 py-1 border w-32'><input type='number' min='0' value='${p.planned_amount}' class='border rounded-md px-2 py-1 w-full plan-edit-amount' data-id='${p.id}' /></td>
+        <td class='px-3 py-1 border w-28 text-right'><button data-id='${p.id}' class='update-plan bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-md'>Update</button></td>
+      </tr>`).join('');
+    container.innerHTML = `<div class='overflow-auto'><table class='min-w-[400px] text-sm border'>
+      <thead class='bg-primary-50'><tr><th class='px-3 py-1 border text-left'>Category</th><th class='px-3 py-1 border'>Planned</th><th class='px-3 py-1 border'></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+    container.querySelectorAll('.update-plan').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        const input = container.querySelector(`.plan-edit-amount[data-id='${id}']`);
+        const amount = parseInt(input.value || '0', 10);
+        await putJSON(`/budget-plan/${id}?amount=${encodeURIComponent(amount)}`);
+      });
+    });
+  }
+
+  document.getElementById('viewPlan').addEventListener('click', async () => {
+    const year = parseInt(document.getElementById('planYear').value || '0', 10);
+    const month = parseInt(document.getElementById('planMonth').value || '0', 10);
+    if (!year || !month) { document.getElementById('planTable').textContent = 'Enter year and month'; return; }
+    await renderPlan(year, month);
+  });
+
+  document.getElementById('deletePlan').addEventListener('click', async () => {
+    const year = parseInt(document.getElementById('planYear').value || '0', 10);
+    const month = parseInt(document.getElementById('planMonth').value || '0', 10);
+    if (!year || !month) { document.getElementById('planMsg').textContent = 'Enter year and month'; return; }
+    await del(`/budget-plan/${year}/${month}`);
+    document.getElementById('planMsg').textContent = 'Deleted.';
+    document.getElementById('planTable').innerHTML = '';
+  });
+
+  // Budget vs Actual
+  document.getElementById('runBVA').addEventListener('click', async () => {
+    const year = parseInt(document.getElementById('bvaYear').value || '0', 10);
+    const month = parseInt(document.getElementById('bvaMonth').value || '0', 10);
+    const container = document.getElementById('bvaContainer');
+    container.innerHTML = '';
+    if (!year || !month) { container.textContent = 'Enter year and month'; return; }
+    const res = await fetch(`/budget-vs-actual/${year}/${month}`, { headers: authHeaders() });
+    if (handleAuth(res)) return;
+    if (!res.ok) { container.textContent = 'Failed to load data'; return; }
+    const data = await res.json();
+    const rows = (data.comparison || []).map(c => `<tr>
+        <td class='px-3 py-1 border'>${c.category}</td>
+        <td class='px-3 py-1 border text-right'>${c.planned_amount}</td>
+        <td class='px-3 py-1 border text-right'>${c.actual_amount}</td>
+      </tr>`).join('');
+    container.innerHTML = `<div class='text-sm text-gray-700'>Year ${data.year}, Month ${data.month}</div>
+      <div class='mt-1'>Total planned: <span class='font-medium text-primary-700'>${data.total_planned||0}</span> • Total actual: <span class='font-medium text-primary-700'>${data.total_expense||0}</span></div>
+      <div class='mt-3 overflow-auto'>
+        <table class='min-w-[400px] text-sm border'>
+          <thead class='bg-primary-50'><tr><th class='px-3 py-1 border text-left'>Category</th><th class='px-3 py-1 border text-right'>Planned</th><th class='px-3 py-1 border text-right'>Actual</th></tr></thead>
+          <tbody>${rows || '<tr><td class="px-3 py-2 text-center" colspan="3">No data</td></tr>'}</tbody>
+        </table>
+      </div>`;
+  });
+
+  // Init
+  (async () => {
+    await loadUser();
+    await loadExpenses();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Login — Budget Buddy{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-primary-700">Login</h1>
+<form id="loginForm" class="mt-6 max-w-md space-y-4">
+  <div>
+    <label class="block text-sm text-gray-700">Email</label>
+    <input type="email" name="username" class="mt-1 w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-400" required />
+  </div>
+  <div>
+    <label class="block text-sm text-gray-700">Password</label>
+    <input type="password" name="password" class="mt-1 w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-400" required />
+  </div>
+  <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md">Login</button>
+  <p id="loginError" class="text-red-600 text-sm mt-2 hidden"></p>
+</form>
+<script>
+  const form = document.getElementById('loginForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const body = new URLSearchParams();
+    for (const [k, v] of formData.entries()) body.append(k, v);
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+      if (!res.ok) throw new Error('Login failed');
+      const data = await res.json();
+      localStorage.setItem('token', data.access_token);
+      window.location.href = '/dashboard';
+    } catch (err) {
+      const el = document.getElementById('loginError');
+      el.textContent = err.message || 'Login failed';
+      el.classList.remove('hidden');
+    }
+  });
+</script>
+{% endblock %}

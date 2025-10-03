@@ -1,0 +1,15 @@
+fastapi
+fastapi[standard]
+uvicorn[standard]
+SQLAlchemy
+aiosqlite
+pydantic[email]   # for signup/login validation
+passlib[bcrypt]   # password hashing
+python-jose  # JWT tokens for login
+
+asyncpg   # async driver for PostgreSQL
+psycopg2
+python-dotenv
+bcrypt==4.3.0
+python-multipart
+jinja2
